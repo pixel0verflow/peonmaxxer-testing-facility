@@ -36,11 +36,11 @@ public struct Recurrence: Sendable {
         self.calendar = calendar
     }
 
-    /// The stride between occurrences, in seconds.
-    private var strideSeconds: TimeInterval {
+    /// Calendar-aware stride: number of calendar days between occurrences.
+    private var daysPerStep: Int {
         switch frequency {
-        case .daily: return TimeInterval(86_400 * interval)
-        case .weekly: return TimeInterval(7 * 86_400 * interval)
+        case .daily: return interval
+        case .weekly: return 7 * interval
         }
     }
 
@@ -56,7 +56,10 @@ public struct Recurrence: Sendable {
                 if current >= limit { return result }
             }
             result.append(current)
-            current = current.addingTimeInterval(strideSeconds)
+            guard let next = calendar.date(byAdding: .day, value: daysPerStep, to: current) else {
+                return result
+            }
+            current = next
         }
     }
 
