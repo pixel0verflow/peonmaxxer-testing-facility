@@ -1,1 +1,1 @@
-runChecks(spanChecks + spanSetChecks + recurrenceChecks)
+runChecks(spanChecks + spanSetChecks + recurrenceChecks + dstRegressionChecks)
