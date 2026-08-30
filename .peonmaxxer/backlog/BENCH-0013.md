@@ -1,5 +1,5 @@
 ---
-id: BENCH-103
+id: BENCH-0013
 title: Build the Peonware pricing site (Svelte 5 + Vite)
 area: benchmark
 priority: 120

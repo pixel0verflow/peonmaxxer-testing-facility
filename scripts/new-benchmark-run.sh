@@ -95,9 +95,18 @@ fi
 
 SLUG=$(printf '%s' "$MODEL" | tr '/' '-' | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9.-' '-' | sed 's/-*$//;s/^-*//')
 
-# Next run number: max over existing BENCH-<n> ids, div 100, +1.
-LAST=$(ls .peonmaxxer/backlog/BENCH-*.md 2>/dev/null | sed -E 's/.*BENCH-([0-9]+)\.md/\1/' | sort -n | tail -1 || true)
-RUN=$(( ${LAST:-0} / 100 + 1 ))
+# Next run number. Ids are BENCH-<run><task>: run zero-padded to 3
+# digits, task 1-3 — BENCH-0011..0013 is run 1. (A legacy 3-digit id
+# BENCH-1xx counts as run 1.)
+RUN=$(ls .peonmaxxer/backlog/BENCH-*.md 2>/dev/null | sed -E 's/.*BENCH-([0-9]+)\.md/\1/' | python3 -c '
+import sys
+best = 0
+for line in sys.stdin:
+    n = line.strip()
+    if not n.isdigit(): continue
+    best = max(best, int(n) // (10 if len(n) >= 4 else 100))
+print(best + 1)
+')
 
 WF_NAME="bench-${SLUG}"
 WF_PATH=".peonmaxxer/workflows/${WF_NAME}.yaml"
@@ -123,7 +132,7 @@ with open("peonmaxxer.yaml", "w") as f:
 PYEOF
 
 for T in 1 2 3; do
-  ID="BENCH-$((RUN * 100 + T))"
+  ID=$(printf 'BENCH-%03d%d' "$RUN" "$T")
   TASKDIR="src/${SLUG}/r${RUN}/task${T}"
   mkdir -p "$TASKDIR"
   case "$T" in
@@ -141,7 +150,7 @@ git commit -m "bench: run ${RUN} for ${MODEL} (${LOCALITY_MODE})"
 echo
 echo "Run ${RUN} for ${MODEL} is committed:"
 echo "  workflow:  ${WF_PATH}"
-echo "  tasks:     BENCH-$((RUN*100+1)) BENCH-$((RUN*100+2)) BENCH-$((RUN*100+3))"
+echo "  tasks:     $(printf 'BENCH-%03d1 BENCH-%03d2 BENCH-%03d3' "$RUN" "$RUN" "$RUN")"
 echo "  scaffolds: src/${SLUG}/r${RUN}/task{1,2,3}"
 echo
 if [ "$QUEUE" = 1 ] && [ -n "${PEON_CORE_URL:-}" ] && [ -n "${PEON_TOKEN:-}" ]; then
@@ -164,7 +173,7 @@ for r in rows if isinstance(rows,list) else rows.get("projects",[]):
     [ -n "$PROJECT_ID" ] || { echo "peon project add did not yield a project id" >&2; exit 1; }
   fi
   peon project reconcile "$PROJECT_ID"
-  for T in 1 2 3; do peon task queue "$PROJECT_ID" "BENCH-$((RUN * 100 + T))"; done
+  for T in 1 2 3; do peon task queue "$PROJECT_ID" "$(printf 'BENCH-%03d%d' "$RUN" "$T")"; done
   echo "Pushed, reconciled, and queued on project ${PROJECT_ID}."
   echo "Any connected worker advertising the opencode adapter will pick these up;"
   echo "watch with: peon worker --dashboard"

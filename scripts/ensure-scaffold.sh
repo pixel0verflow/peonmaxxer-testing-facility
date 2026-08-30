@@ -9,9 +9,15 @@ set -eu
 SLUG="$1"
 TASK_ID="$2"
 
-NUM="${TASK_ID##*-}"                 # BENCH-203 -> 203
-RUN=$((NUM / 100))                   # -> 2
-TASK=$((NUM % 100))                  # -> 3
+NUM="${TASK_ID##*-}"                 # BENCH-0023 -> 0023 (legacy BENCH-203 -> 203)
+NUM=$((10#$NUM))                     # strip zero-padding safely
+if [ "${#TASK_ID}" -ge 10 ]; then    # BENCH-yyyx form (4+ digits)
+  RUN=$((NUM / 10))
+  TASK=$((NUM % 10))
+else                                 # legacy BENCH-<run><task%100>
+  RUN=$((NUM / 100))
+  TASK=$((NUM % 100))
+fi
 DIR="src/${SLUG}/r${RUN}/task${TASK}"
 
 if [ ! -d "$DIR" ]; then

@@ -53,7 +53,8 @@ prints how to queue that run by hand. Every invocation is a new numbered
 run — don't re-run it to retry queueing.
 
 Each invocation of `new-benchmark-run.sh` is a fresh, numbered run:
-fresh task ids (`BENCH-<run><task>`), fresh scaffold copies, one
+fresh task ids (`BENCH-<run><task>` — run zero-padded to three digits,
+task 1-3, so run 2 is `BENCH-0021..0023`), fresh scaffold copies, one
 generated workflow per model (`.peonmaxxer/workflows/bench-<slug>.yaml`
 — workflows pin the model statically; peonmaxxer cannot vary a model per
 run yet). With the dashboard up, the right pane hosts the real opencode session —

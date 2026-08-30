@@ -151,10 +151,20 @@ steps:
 
       ## Review
 
-      A fresh-session reviewer examined the diff after the first PR; its
-      findings (if any) were applied by a separate fix session — see the
-      `review` and `applyfixes` step results in the run's event log.
+      A fresh-session adversarial reviewer examined the diff after the
+      first PR; a separate fix session applied its findings. Their own
+      words, latest pass last:
 
+      ### Reviewer
+
+      {{range .Steps}}{{if eq .ID "review"}}{{.Result}}
+
+      {{end}}{{end}}
+      ### Fix session
+
+      {{range .Steps}}{{if eq .ID "applyfixes"}}{{.Result}}
+
+      {{end}}{{end}}
       ## Verify
 
       ```

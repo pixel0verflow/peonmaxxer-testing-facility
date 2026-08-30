@@ -1,5 +1,5 @@
 ---
-id: BENCH-102
+id: BENCH-0012
 title: Implement the logstat CLI from its spec (Rust, std-only)
 area: benchmark
 priority: 110
