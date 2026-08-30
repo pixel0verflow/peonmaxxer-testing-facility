@@ -9,9 +9,9 @@
 **model:** `n/a — human` (local/api) · **harness:** `n/a` · **time to complete:** n/a · **tokens in/out:** n/a
 
 <!-- For benchmark PRs the line above is generated with the real model,
-     locality (API, or local + machine specs), and — after
-     scripts/stamp-pr-stats.sh — wall-clock time and token totals.
-     Keep it as line 1: tooling parses it. -->
+     locality (API, or local + machine specs), wall-clock time, and token
+     totals, all rendered by the workflow. Keep it as line 1: tooling
+     parses it. -->
 
 ## What?
 

@@ -47,7 +47,7 @@ steps:
     kind: pr
     title: "bench(opencode-muse-spark-1.2-contributor-free): {{.Task.ID}} {{.Task.Title}}"
     body: |
-      **model:** `opencode/muse-spark-1.2-contributor-free` (api) · **harness:** `opencode` · **time to complete:** ⏳ pending `scripts/stamp-pr-stats.sh` · **tokens in/out:** ⏳ pending
+      **model:** `opencode/muse-spark-1.2-contributor-free` (api) · **harness:** `opencode` · **time to complete:** {{.Run.Elapsed}} · **tokens in/out:** {{.Run.InTokens}} / {{.Run.OutTokens}}
 
       ## Task
 
@@ -55,7 +55,7 @@ steps:
 
       ## Steps
 
-      {{range .Steps}}- `{{.ID}}` ({{.Kind}}): {{if .Passed}}passed{{else}}FAILED{{end}}
+      {{range .Steps}}- `{{.ID}}` ({{.Kind}}): {{if .Passed}}passed{{else}}FAILED{{end}}{{if .InTokens}} — {{.InTokens}}/{{.OutTokens}} tokens{{end}}
       {{end}}
 
       ## Verify
@@ -132,7 +132,7 @@ steps:
     kind: pr
     title: "bench(opencode-muse-spark-1.2-contributor-free): {{.Task.ID}} {{.Task.Title}}"
     body: |
-      **model:** `opencode/muse-spark-1.2-contributor-free` (api) · **harness:** `opencode` · **time to complete:** ⏳ pending `scripts/stamp-pr-stats.sh` · **tokens in/out:** ⏳ pending
+      **model:** `opencode/muse-spark-1.2-contributor-free` (api) · **harness:** `opencode` · **time to complete:** {{.Run.Elapsed}} · **tokens in/out:** {{.Run.InTokens}} / {{.Run.OutTokens}}
 
       ## Task
 
@@ -140,7 +140,7 @@ steps:
 
       ## Steps
 
-      {{range .Steps}}- `{{.ID}}` ({{.Kind}}): {{if .Passed}}passed{{else}}FAILED{{end}}
+      {{range .Steps}}- `{{.ID}}` ({{.Kind}}): {{if .Passed}}passed{{else}}FAILED{{end}}{{if .InTokens}} — {{.InTokens}}/{{.OutTokens}} tokens{{end}}
       {{end}}
 
       ## Review

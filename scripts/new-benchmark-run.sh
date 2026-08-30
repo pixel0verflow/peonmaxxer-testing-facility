@@ -113,15 +113,35 @@ echo "  workflow:  ${WF_PATH}"
 echo "  tasks:     BENCH-$((RUN*100+1)) BENCH-$((RUN*100+2)) BENCH-$((RUN*100+3))"
 echo "  scaffolds: src/${SLUG}/r${RUN}/task{1,2,3}"
 echo
-if [ "$QUEUE" = 1 ] && [ -n "${PEON_CORE_URL:-}" ] && [ -n "${PEON_TOKEN:-}" ] && [ -n "${PEON_PROJECT_ID:-}" ]; then
+if [ "$QUEUE" = 1 ] && [ -n "${PEON_CORE_URL:-}" ] && [ -n "${PEON_TOKEN:-}" ]; then
   git push
-  peon project reconcile "$PEON_PROJECT_ID"
-  for T in 1 2 3; do peon task queue "$PEON_PROJECT_ID" "BENCH-$((RUN * 100 + T))"; done
-  echo "Pushed, reconciled, and queued. Start a worker with: peon worker --dashboard"
+  # Bootstrap the project on the core if this is the first run: identity
+  # by name, repo/paths derived from this checkout. Needs an admin-scope
+  # PEON_TOKEN the first time; reconcile/queue work with it thereafter.
+  PROJECT_NAME="peonmaxxer-testing-facility"
+  PROJECT_ID="${PEON_PROJECT_ID:-$(peon project list --json 2>/dev/null | python3 -c '
+import json,sys
+name=sys.argv[1]
+try: rows=json.load(sys.stdin)
+except Exception: rows=[]
+for r in rows if isinstance(rows,list) else rows.get("projects",[]):
+    if r.get("name")==name: print(r.get("id","")); break
+' "$PROJECT_NAME")}"
+  if [ -z "$PROJECT_ID" ]; then
+    echo "project not found on the core; creating it..."
+    PROJECT_ID=$(peon project add --name "$PROJECT_NAME"       --repo-url "$(git remote get-url origin)" --local-path "$(pwd)"       | grep -oE '[a-z0-9_-]+$' | tail -1)
+    [ -n "$PROJECT_ID" ] || { echo "peon project add did not yield a project id" >&2; exit 1; }
+  fi
+  peon project reconcile "$PROJECT_ID"
+  for T in 1 2 3; do peon task queue "$PROJECT_ID" "BENCH-$((RUN * 100 + T))"; done
+  echo "Pushed, reconciled, and queued on project ${PROJECT_ID}."
+  echo "Any connected worker advertising the opencode adapter will pick these up;"
+  echo "watch with: peon worker --dashboard"
 else
   cat <<NEXT
 Next steps (the core reads config and backlog from origin/<default branch>):
   git push
+  scripts/new-benchmark-run.sh --queue   # …or by hand:
   peon project reconcile <project-id>
   peon task queue <project-id> BENCH-$((RUN*100+1))   # then 2 and 3
   peon worker --dashboard        # watch the live pane; t takes over
