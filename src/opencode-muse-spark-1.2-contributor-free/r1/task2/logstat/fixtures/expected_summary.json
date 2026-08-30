@@ -1,0 +1,1 @@
+{"paths":[{"path":"/api/users","requests":6,"errors":1,"p50_ms":95,"p95_ms":340},{"path":"/health","requests":5,"errors":0,"p50_ms":5,"p95_ms":7},{"path":"/api/orders","requests":4,"errors":1,"p50_ms":205,"p95_ms":900},{"path":"/api/users/7","requests":1,"errors":0,"p50_ms":60,"p95_ms":60}],"skipped":2}

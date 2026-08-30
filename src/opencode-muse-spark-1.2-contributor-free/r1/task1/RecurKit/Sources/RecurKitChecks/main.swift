@@ -1,0 +1,1 @@
+runChecks(spanChecks + spanSetChecks + recurrenceChecks)

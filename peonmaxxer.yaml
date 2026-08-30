@@ -15,7 +15,8 @@ workflow:
   # Per-model workflows are generated into .peonmaxxer/workflows/ by
   # scripts/new-benchmark-run.sh and registered here under `named`.
   default: builtin:standard
-  named: {}
+  named:
+    bench-opencode-muse-spark-1.2-contributor-free: .peonmaxxer/workflows/bench-opencode-muse-spark-1.2-contributor-free.yaml
 
 gate:
   # Every benchmark task carries its own verify:; this is only the

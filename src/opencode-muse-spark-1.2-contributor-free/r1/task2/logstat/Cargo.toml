@@ -1,0 +1,9 @@
+[package]
+name = "logstat"
+version = "0.1.0"
+edition = "2021"
+
+# Deliberately no dependencies: the implementation is std-only (the
+# benchmark host's sandbox has no crates.io access, and hand-rolled
+# parsing is part of the exercise).
+[dependencies]

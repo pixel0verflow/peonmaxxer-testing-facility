@@ -1,0 +1,6 @@
+path	requests	errors	p50_ms	p95_ms
+/api/users	6	1	95	340
+/health	5	0	5	7
+/api/orders	4	1	205	900
+/api/users/7	1	0	60	60
+skipped	2

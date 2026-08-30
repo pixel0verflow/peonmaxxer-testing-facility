@@ -1,0 +1,12 @@
+{
+  "plans": ["starter", "team", "enterprise"],
+  "features": [
+    { "name": "Projects",            "starter": "3",     "team": "Unlimited", "enterprise": "Unlimited" },
+    { "name": "Seats included",      "starter": "1",     "team": "10",        "enterprise": "50" },
+    { "name": "History retention",   "starter": "30 d",  "team": "1 yr",      "enterprise": "Unlimited" },
+    { "name": "SSO / SAML",          "starter": "—",     "team": "—",         "enterprise": "✓" },
+    { "name": "Audit log",           "starter": "—",     "team": "✓",         "enterprise": "✓" },
+    { "name": "Priority support",    "starter": "—",     "team": "✓",         "enterprise": "✓" },
+    { "name": "On-prem runner",      "starter": "—",     "team": "—",         "enterprise": "✓" }
+  ]
+}
