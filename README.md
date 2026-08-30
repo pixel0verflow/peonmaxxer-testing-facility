@@ -23,19 +23,20 @@ task's answer key is deliberately **not** in this repository.
 
 ## Running a benchmark
 
-One-time setup (see peonmaxxer-core's Quickstart for the full flow —
-project registration is NOT needed here, `--queue` does it itself):
+One-time setup (see peonmaxxer-core's Quickstart for the full flow):
 
 ```sh
 peon serve --data-dir ~/.peon/data &
+peon project add --name peonmaxxer-testing-facility \
+  --repo-url git@github.com:pixel0verflow/peonmaxxer-testing-facility.git \
+  --local-path <this checkout>
 peon profile list                             # already have an `opencode` profile? then skip the next line
 peon profile add opencode --kind subscription --harness opencode
 peon profile check opencode                   # preflight against the real binary
 peon token create --scope worker --name bench-worker
 ```
 
-Per model, per run — one command with `PEON_CORE_URL`/`PEON_TOKEN` set
-(admin scope the first time, so it can register the project itself):
+Per model, per run — one command with `PEON_CORE_URL`/`PEON_TOKEN` set:
 
 ```sh
 scripts/new-benchmark-run.sh --queue         # interactive picker over `opencode models`
@@ -44,10 +45,12 @@ scripts/new-benchmark-run.sh --queue         # interactive picker over `opencode
 PEON_TOKEN=<worker token> peon worker --dashboard
 ```
 
-`--queue` pushes, registers the project on the core if it isn't there
-(name `peonmaxxer-testing-facility`, repo/paths derived from this
-checkout), reconciles, and queues all three tasks. Without it the script
-only generates and commits, and prints the manual steps.
+`--queue` refuses up front — before generating anything — if the env is
+missing or the project isn't registered, then pushes, reconciles, and
+queues all three tasks (project resolved by name; `PEON_PROJECT_ID`
+overrides). Without `--queue` the script only generates and commits and
+prints how to queue that run by hand. Every invocation is a new numbered
+run — don't re-run it to retry queueing.
 
 Each invocation of `new-benchmark-run.sh` is a fresh, numbered run:
 fresh task ids (`BENCH-<run><task>`), fresh scaffold copies, one

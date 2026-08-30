@@ -31,6 +31,37 @@ for arg in "$@"; do
   esac
 done
 
+PROJECT_NAME="peonmaxxer-testing-facility"
+PROJECT_ID=""
+if [ "$QUEUE" = 1 ]; then
+  # Everything that can refuse does so NOW, before a run is generated —
+  # a failed --queue attempt must never leave a committed run behind.
+  if [ -z "${PEON_CORE_URL:-}" ] || [ -z "${PEON_TOKEN:-}" ]; then
+    echo "--queue needs PEON_CORE_URL and PEON_TOKEN set (see README)." >&2
+    exit 2
+  fi
+  command -v peon >/dev/null || { echo "--queue needs peon on PATH." >&2; exit 2; }
+  PROJECT_ID="${PEON_PROJECT_ID:-$(peon project list --json 2>/dev/null | python3 -c '
+import json,sys
+name=sys.argv[1]
+try: rows=json.load(sys.stdin)
+except Exception: rows=[]
+for r in rows if isinstance(rows,list) else rows.get("projects",[]):
+    if r.get("name")==name: print(r.get("id","")); break
+' "$PROJECT_NAME")}"
+  if [ -z "$PROJECT_ID" ]; then
+    cat >&2 <<REGISTER
+Project "$PROJECT_NAME" is not registered on the core (or the core is
+unreachable). Register it once, then re-run:
+
+  peon project add --name $PROJECT_NAME \
+    --repo-url "$(git remote get-url origin)" --local-path "$(pwd)"
+
+REGISTER
+    exit 2
+  fi
+fi
+
 if [ -z "$MODEL" ]; then
   command -v opencode >/dev/null || { echo "opencode CLI not on PATH and no model given" >&2; exit 2; }
   echo "Fetching models from the opencode connectors..." >&2
