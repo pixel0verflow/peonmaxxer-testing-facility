@@ -78,7 +78,7 @@ them; `manual_review` marks any run a human touched.
 - macOS with Swift (Command Line Tools suffice — task1's checks use a
   framework-free runner on purpose), Node ≥ 20, Rust (`brew install rust`),
   `opencode` ≥ 1.18.21, `gh` authenticated for this repo.
-- Note: on hosts where node/cargo live under `/opt/homebrew`, agent
-  sessions cannot run them in-sandbox today (the seatbelt read
-  allow-list lacks `/opt`); tasks 2 and 3 lean on the verify→fix
-  feedback loop instead. Swift works in-session.
+- peonmaxxer-core with [PR #118](https://github.com/pixel0verflow/peonmaxxer-core/pull/118)
+  (merged 2026-08-30) — it admits `/opt` read-only in the agent sandbox so
+  sessions can run Homebrew toolchains (node, cargo) themselves. On older
+  builds, tasks 2 and 3 fall back to the verify→fix feedback loop.
