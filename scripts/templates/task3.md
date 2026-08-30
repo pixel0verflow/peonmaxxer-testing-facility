@@ -21,8 +21,9 @@ lockfile (Svelte 5, Vite, vitest), `vite.config.js`, the pricing test
 contract in `tests/pricing.test.js`, and grid data in
 `data/features.json`. The pricing rules (marginal volume tiers, annual
 discount, rounding) are fully pinned by the tests. Caches are kept
-in-tree via `.npmrc`. Your session sandbox may not be able to run npm
-itself; the verify gate runs it and feeds failures back to you.
+in-tree via `.npmrc`. Run `npm ci && npm test && npm run build` yourself
+as you work (current peonmaxxer builds allow it in-session); if your
+sandbox cannot, the verify gate runs it and feeds failures back to you.
 
 ## Do
 Read `__TASKDIR__/pricing-site/PLAN.md`. Implement

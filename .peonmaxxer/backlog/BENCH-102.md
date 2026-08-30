@@ -18,9 +18,9 @@ The crate skeleton is in `src/opencode-muse-spark-1.2-contributor-free/r1/task2/
 pinned executable contract in `tests/cli.rs`, and byte-exact goldens in
 `fixtures/`. No external crates — the host has no crates.io access; flag
 parsing and JSON output are hand-rolled. Percentiles use nearest-rank;
-the spec pins every format decision. Your session sandbox may not be
-able to run cargo itself; the verify gate runs it and feeds failures
-back to you.
+the spec pins every format decision. Run `cargo test` yourself as you
+work (current peonmaxxer builds allow it in-session); if your sandbox
+cannot, the verify gate runs it and feeds failures back to you.
 
 ## Do
 Read `src/opencode-muse-spark-1.2-contributor-free/r1/task2/logstat/PLAN.md` and implement `src/main.rs` (split
