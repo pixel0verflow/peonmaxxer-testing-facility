@@ -23,12 +23,14 @@ task's answer key is deliberately **not** in this repository.
 
 ## Running a benchmark
 
-One-time setup (see peonmaxxer-core's Quickstart for the full flow):
+One-time setup (see peonmaxxer-core's Quickstart for the full flow —
+project registration is NOT needed here, `--queue` does it itself):
 
 ```sh
 peon serve --data-dir ~/.peon/data &
-peon project add --name peonmaxxer-testing-facility --repo-url <this repo> --local-path <this checkout>
+peon profile list                             # already have an `opencode` profile? then skip the next line
 peon profile add opencode --kind subscription --harness opencode
+peon profile check opencode                   # preflight against the real binary
 peon token create --scope worker --name bench-worker
 ```
 
@@ -72,6 +74,8 @@ them; `manual_review` marks any run a human touched.
 - macOS with Swift (Command Line Tools suffice — task1's checks use a
   framework-free runner on purpose), Node ≥ 20, Rust (`brew install rust`),
   `opencode` ≥ 1.18.21, `gh` authenticated for this repo.
-- a `peon` binary built from peonmaxxer-core main of 2026-08-30 or later
-  (agent sessions can run Homebrew toolchains in-sandbox, and workflow
-  templates can render run stats — both used here).
+- a `peon` binary built from peonmaxxer-core main of 2026-08-31 or later
+  (in-sandbox Homebrew toolchains, template-rendered run stats, and the
+  worker dashboard's live harness pane — `t` to take over — all ship by
+  then; until CORE-031 lands on main, build from its PR branch for the
+  live pane).
