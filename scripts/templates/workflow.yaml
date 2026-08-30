@@ -39,7 +39,6 @@ steps:
       action: goto
       step: implement
       max: 2
-      on_exhausted: fail
 
   - id: push
     kind: push
@@ -125,7 +124,6 @@ steps:
       action: goto
       step: applyfixes
       max: 2
-      on_exhausted: fail
 
   - id: push2
     kind: push
