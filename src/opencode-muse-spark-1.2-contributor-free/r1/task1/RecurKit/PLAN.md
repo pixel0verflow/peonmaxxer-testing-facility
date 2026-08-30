@@ -2,7 +2,7 @@
 
 RecurKit is a small date library: half-open `Span`s, a coalescing
 `SpanSet`, and a `Recurrence` rule engine. It ships with a check suite
-(`swift run RecurKitChecks`) that currently passes.
+(`swift run --disable-sandbox RecurKitChecks`) that currently passes.
 
 ## The bug report
 
@@ -32,5 +32,8 @@ Filed by a user of the library, verbatim:
 
 - Do not weaken or delete existing checks.
 - Do not change the public API.
-- `swift run RecurKitChecks` (run in this directory) must exit 0 when
-  you are done.
+- `swift run --disable-sandbox RecurKitChecks` (run in this directory)
+  must exit 0 when you are done. `--disable-sandbox` is required because
+  this already runs inside a sandbox (peonmaxxer's gate and agent
+  sessions alike), and macOS refuses SwiftPM's nested one — without the
+  flag the build dies with `sandbox_apply: Operation not permitted`.

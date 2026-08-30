@@ -30,6 +30,12 @@ steps:
         {{.Task.Verify}}
         If your session sandbox cannot run parts of that toolchain, rely
         on careful reading and the gate's feedback loop instead.
+      {{if .LastFailure}}
+      This is a RETRY. The previous attempt's gate failure — fix THIS,
+      do not start over:
+
+      {{.LastFailure}}
+      {{end}}
 
   - id: verify
     kind: command

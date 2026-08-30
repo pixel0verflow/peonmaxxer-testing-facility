@@ -3,12 +3,12 @@ id: __ID__
 title: Find and fix the recurrence drift bug in RecurKit (Swift)
 area: benchmark
 priority: 100
-verify: 'cd __TASKDIR__/RecurKit && swift run RecurKitChecks'
+verify: 'cd __TASKDIR__/RecurKit && swift run --disable-sandbox RecurKitChecks'
 workflow: bench-__SLUG__
 done_when:
   - "a new check in Sources/RecurKitChecks reproduces the reported drift deterministically and is registered in main.swift"
   - "the root cause in Sources/RecurKit is fixed without changing the public API"
-  - "swift run RecurKitChecks exits 0 with every pre-existing check intact"
+  - "swift run --disable-sandbox RecurKitChecks exits 0 with every pre-existing check intact"
 ---
 ## Goal
 Fix the bug behind the user report in `__TASKDIR__/RecurKit/PLAN.md`, and
