@@ -21,9 +21,9 @@
         {#each featuresData.features as feature}
           <tr>
             <th scope="row">{feature.name}</th>
-            <td>{feature.starter}</td>
-            <td>{feature.team}</td>
-            <td>{feature.enterprise}</td>
+            {#each featuresData.plans as plan}
+              <td>{feature[plan]}</td>
+            {/each}
           </tr>
         {/each}
       </tbody>

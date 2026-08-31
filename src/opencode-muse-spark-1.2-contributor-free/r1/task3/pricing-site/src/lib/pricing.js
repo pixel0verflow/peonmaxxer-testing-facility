@@ -1,22 +1,11 @@
-const RATES = {
-  starter: 9,
-  team: 18,
-  enterprise: 32,
-};
-
-const RATES_CENTS = {
+export const RATES_CENTS = {
   starter: 900,
   team: 1800,
   enterprise: 3200,
 };
 
-function roundCentsHalfUp(value) {
-  // value is in cents (may be fractional), round half-up to nearest integer cent
-  return Math.round(value);
-}
-
 export function computePrice({ plan, seats, months, addons = [] }) {
-  if (!RATES.hasOwnProperty(plan)) {
+  if (!Object.prototype.hasOwnProperty.call(RATES_CENTS, plan)) {
     throw new Error(`Invalid plan: ${plan}`);
   }
   if (!Number.isInteger(seats) || seats < 1) {
@@ -68,7 +57,7 @@ export function computePrice({ plan, seats, months, addons = [] }) {
     monthlyRawCents = (subtotalCents * 4) / 5;
   }
 
-  const monthlyCents = roundCentsHalfUp(monthlyRawCents);
+  const monthlyCents = Math.round(monthlyRawCents);
   const monthly = monthlyCents / 100;
 
   const totalCents = monthlyCents * months;

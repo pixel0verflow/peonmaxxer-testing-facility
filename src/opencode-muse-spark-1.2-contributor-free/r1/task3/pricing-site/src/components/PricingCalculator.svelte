@@ -1,8 +1,9 @@
 <script>
-  import { computePrice } from "../lib/pricing.js";
+  import { computePrice, RATES_CENTS } from "../lib/pricing.js";
+  import featuresData from "../../data/features.json";
 
   let plan = $state("team");
-  let seats = $state(5);
+  let seatsRaw = $state("5");
   let months = $state(1);
   let sso = $state(false);
   let backup = $state(false);
@@ -14,11 +15,16 @@
     ].filter(Boolean)
   );
 
-  let seatsInput = $derived(String(seats));
-
   let result = $derived.by(() => {
     try {
-      const nSeats = Number(seats);
+      const trimmed = seatsRaw.trim();
+      if (trimmed === "") {
+        throw new Error(`Invalid seats: ${seatsRaw}`);
+      }
+      const nSeats = Number(trimmed);
+      if (!Number.isFinite(nSeats)) {
+        throw new Error(`Invalid seats: ${seatsRaw}`);
+      }
       return computePrice({ plan, seats: nSeats, months, addons });
     } catch (e) {
       return { error: e.message };
@@ -26,13 +32,7 @@
   });
 
   function handleSeatsInput(e) {
-    const v = e.currentTarget.value;
-    const parsed = parseInt(v, 10);
-    if (v === "" || Number.isNaN(parsed)) {
-      seats = v;
-    } else {
-      seats = parsed;
-    }
+    seatsRaw = e.currentTarget.value;
   }
 
   let isAnnual = $derived(months === 12);
@@ -47,7 +47,7 @@
       <fieldset>
         <legend>Plan</legend>
         <div class="plan-options" role="radiogroup" aria-label="Select plan">
-          {#each ["starter", "team", "enterprise"] as p}
+          {#each featuresData.plans as p}
             <label class="radio-card" class:selected={plan===p}>
               <input
                 type="radio"
@@ -58,9 +58,7 @@
               />
               <span class="plan-name">{p}</span>
               <span class="plan-price">
-                {#if p==="starter"}$9{/if}
-                {#if p==="team"}$18{/if}
-                {#if p==="enterprise"}$32{/if}
+                ${RATES_CENTS[p] / 100}
                 <span class="per">/seat/mo</span>
               </span>
             </label>
@@ -76,7 +74,7 @@
           min="1"
           step="1"
           inputmode="numeric"
-          value={seats}
+          value={seatsRaw}
           oninput={handleSeatsInput}
           aria-describedby="seats-help"
         />
@@ -207,8 +205,14 @@
   }
   .radio-card input {
     position: absolute;
-    opacity: 0;
-    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
   .plan-name {
     text-transform: capitalize;

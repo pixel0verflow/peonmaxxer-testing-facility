@@ -4,7 +4,7 @@
   import PricingCalculator from "./components/PricingCalculator.svelte";
 </script>
 
-<main>
+<main id="top">
   <Hero />
   <FeatureGrid />
   <PricingCalculator />
