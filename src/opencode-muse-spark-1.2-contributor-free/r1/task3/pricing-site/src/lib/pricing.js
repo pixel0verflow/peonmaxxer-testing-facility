@@ -32,21 +32,19 @@ export function computePrice({ plan, seats, months, addons = [] }) {
   const rateCents = RATES_CENTS[plan];
 
   // seat subtotal in cents with marginal tiers
-  // 1-10 full, 11-50 90%, 51+ 75%
+  // 1-10 full, 11-50 90%, 51+ 75% — integer arithmetic to avoid FP drift
   let seatCents = 0;
   const tier1 = Math.min(seats, 10);
   seatCents += tier1 * rateCents;
 
   if (seats > 10) {
     const tier2 = Math.min(seats - 10, 40);
-    // 90% => *9/10
-    seatCents += tier2 * rateCents * 0.9;
+    seatCents += (tier2 * rateCents * 9) / 10;
   }
   if (seats > 50) {
     const tier3 = seats - 50;
-    seatCents += tier3 * rateCents * 0.75;
+    seatCents += (tier3 * rateCents * 3) / 4;
   }
-  // Ensure integer cents (floating from *0.9 etc should be integer but round to avoid FP)
   seatCents = Math.round(seatCents);
 
   // addon sum in cents
@@ -64,10 +62,10 @@ export function computePrice({ plan, seats, months, addons = [] }) {
   const undiscountedSeatCents = seats * rateCents;
   const undiscountedTotalCents = (undiscountedSeatCents + addonCents) * months;
 
-  // monthly raw cents after annual discount
+  // monthly raw cents after annual discount — use 4/5 for exact fraction
   let monthlyRawCents = subtotalCents;
   if (months === 12) {
-    monthlyRawCents = subtotalCents * 0.8;
+    monthlyRawCents = (subtotalCents * 4) / 5;
   }
 
   const monthlyCents = roundCentsHalfUp(monthlyRawCents);
