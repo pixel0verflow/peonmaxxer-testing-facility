@@ -1,11 +1,10 @@
-use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::process;
 
 const VALID_METHODS: &[&str] = &["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
-const VALID_STATUS_CLASSES: &[&str] = &["1xx", "2xx", "3xx", "4xx", "5xx"];
+const VALID_STATUS_CLASSES: &[&str] = &["2xx", "3xx", "4xx", "5xx"];
 
 #[derive(Debug, Clone)]
 struct Entry {
@@ -201,7 +200,6 @@ fn print_usage_and_exit(code: i32, msg: &str) -> ! {
 
 fn status_matches(status: u16, class: &str) -> bool {
     match class {
-        "1xx" => (100..200).contains(&status),
         "2xx" => (200..300).contains(&status),
         "3xx" => (300..400).contains(&status),
         "4xx" => (400..500).contains(&status),
