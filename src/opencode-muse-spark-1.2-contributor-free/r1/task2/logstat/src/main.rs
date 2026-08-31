@@ -4,6 +4,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::process;
 
 const VALID_METHODS: &[&str] = &["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
+// includes 3xx: PLAN.md:40 header lists <2xx|4xx|5xx> but prose "etc." and usual classes imply 3xx is valid
 const VALID_STATUS_CLASSES: &[&str] = &["2xx", "3xx", "4xx", "5xx"];
 
 #[derive(Debug, Clone)]
@@ -19,9 +20,13 @@ mod parse {
     use super::{Entry, VALID_METHODS};
 
     pub fn parse_line(line: &str) -> Option<Entry> {
-        // split on whitespace (normalizes single spaces) and require exactly 5 fields
-        let parts: Vec<&str> = line.split_whitespace().collect();
+        // spec "exactly five space-separated fields" = literal ' ' separator (not tabs/multiple spaces)
+        let parts: Vec<&str> = line.split(' ').collect();
         if parts.len() != 5 {
+            return None;
+        }
+        // consecutive, leading or trailing spaces produce empty parts -> invalid
+        if parts.iter().any(|p| p.is_empty()) {
             return None;
         }
         let ts = parts[0];
@@ -85,10 +90,13 @@ mod agg {
 
     pub fn percentile(sorted: &[u64], p: usize) -> u64 {
         // nearest-rank: ceil(p/100 * N), 1-indexed
+        if sorted.is_empty() {
+            return 0;
+        }
+        assert!(!sorted.is_empty(), "percentile requires non-empty slice");
         let n = sorted.len();
-        debug_assert!(n > 0);
         let rank = (p * n + 99) / 100; // ceil(p*n/100)
-        let idx = rank - 1;
+        let idx = rank.saturating_sub(1);
         sorted[idx]
     }
 
@@ -214,17 +222,34 @@ fn is_valid_status_class(s: &str) -> bool {
 
 fn read_entries(path: &str) -> io_result<(Vec<Entry>, usize)> {
     let file = File::open(path).map_err(|e| e.to_string())?;
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
     let mut entries = Vec::new();
     let mut skipped = 0usize;
-    for line_res in reader.lines() {
-        let line = line_res.map_err(|e| e.to_string())?;
+    let mut buf: Vec<u8> = Vec::new();
+    loop {
+        buf.clear();
+        let n = reader.read_until(b'\n', &mut buf).map_err(|e| e.to_string())?;
+        if n == 0 {
+            break;
+        }
+        // strip trailing \n and optional \r (handle \r\n)
+        if buf.ends_with(&[b'\n']) {
+            buf.pop();
+            if buf.ends_with(&[b'\r']) {
+                buf.pop();
+            }
+        }
+        // non-UTF8 lines are skipped per spec ("any invalid line is skipped never error"), not a read error
+        let line = match String::from_utf8(buf.clone()) {
+            Ok(s) => s,
+            Err(_) => {
+                skipped += 1;
+                continue;
+            }
+        };
         if let Some(e) = parse::parse_line(&line) {
             entries.push(e);
         } else {
-            // empty lines? split_whitespace gives 0 parts -> skipped. That is intended
-            // But need to count every line that is not valid, including empty?
-            // An empty line has 0 fields -> skipped
             skipped += 1;
         }
     }
@@ -294,39 +319,54 @@ fn main() {
     let sub = args[1].as_str();
     match sub {
         "summary" => {
-            // summary <file> [--json]
+            // summary <file> [--json]  — supports "--" separator for dash-prefixed files
             if args.len() < 3 {
                 print_usage_and_exit(2, "missing file argument for 'summary'");
             }
-            let file = args[2].clone();
-            if file.starts_with('-') {
-                print_usage_and_exit(2, "missing file argument for 'summary'");
-            }
+            let (file, next_idx) = if args[2] == "--" {
+                if args.len() < 4 {
+                    print_usage_and_exit(2, "missing file argument for 'summary'");
+                }
+                (args[3].clone(), 4)
+            } else {
+                let f = args[2].clone();
+                if f.starts_with('-') {
+                    print_usage_and_exit(2, "missing file argument for 'summary'");
+                }
+                (f, 3)
+            };
             let mut json = false;
-            if args.len() == 4 {
-                if args[3] == "--json" {
+            if args.len() == next_idx + 1 {
+                if args[next_idx] == "--json" {
                     json = true;
                 } else {
-                    print_usage_and_exit(2, &format!("unknown argument '{}' for 'summary'", args[3]));
+                    print_usage_and_exit(2, &format!("unknown argument '{}' for 'summary'", args[next_idx]));
                 }
-            } else if args.len() > 4 {
+            } else if args.len() > next_idx + 1 {
                 print_usage_and_exit(2, "too many arguments for 'summary'");
             }
             let code = run_summary(&file, json);
             process::exit(code);
         }
         "filter" => {
-            // filter <file> --status <class> [--method <METHOD>]
+            // filter <file> --status <class> [--method <METHOD>] — supports "--" separator
             if args.len() < 3 {
                 print_usage_and_exit(2, "missing file argument for 'filter'");
             }
-            let file = args[2].clone();
-            if file.starts_with('-') {
-                print_usage_and_exit(2, "missing file argument for 'filter'");
-            }
+            let (file, mut i) = if args[2] == "--" {
+                if args.len() < 4 {
+                    print_usage_and_exit(2, "missing file argument for 'filter'");
+                }
+                (args[3].clone(), 4)
+            } else {
+                let f = args[2].clone();
+                if f.starts_with('-') {
+                    print_usage_and_exit(2, "missing file argument for 'filter'");
+                }
+                (f, 3)
+            };
             let mut status_class: Option<String> = None;
             let mut method_filter: Option<String> = None;
-            let mut i = 3;
             while i < args.len() {
                 match args[i].as_str() {
                     "--status" => {
